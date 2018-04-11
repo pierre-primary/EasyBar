@@ -2,10 +2,9 @@
  * @author:Ybao
  */
 export default {
-    minLenght: 50,
-    maxLenght: -1,
+    minLength: 50,
+    maxLength: -1,
     resizeRefresh: true,
-    unselectableBody: true,
     barfloat: false,
     preventParentScroll: false,
     scrollBarBehavior: null, //show|hide|none show|hide|none

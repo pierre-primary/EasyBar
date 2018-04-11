@@ -1,0 +1,56 @@
+/**
+ * @author:Ybao
+ */
+* {
+    margin: 0px;
+    padding: 0px;
+    color: #aaa;
+}
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    height: 100%;
+    width: 100%;
+    background-color: rgb(44, 44, 44);
+}
+.cev-box {
+    background-color: rgb(40, 40, 40);
+    border-radius: 10px;
+    width: 760px;
+    padding: 50px 100px;
+    margin: 100px auto;
+    box-sizing: border-box;
+}
+
+.scroll-box {
+    border-radius: 10px;
+    width: 100%;
+    height: 250px;
+    background-color: rgb(55, 55, 55);
+    margin: 10px 0px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+@media only screen and (max-width: 780px) {
+    .cev-box {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin: 10px auto;
+        box-sizing: border-box;
+    }
+}
+.scroll-cev {
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+pre > img {
+    width: 100%;
+}

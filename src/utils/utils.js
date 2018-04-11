@@ -61,7 +61,7 @@ export default class Utils {
      * @param {Function} fn 执行体
      * @param {Number} delay 周期时间
      */
-    static debounce(fn, delay) {
+    static debounce(fn, delay, nowFn) {
         delay || (delay = 100);
         var timer = null;
         return function() {
@@ -71,6 +71,9 @@ export default class Utils {
             timer = setTimeout(function() {
                 fn.apply(context, args);
             }, delay);
+            if (nowFn) {
+                return nowFn.apply(context, args);
+            }
         };
     }
     /**
@@ -78,7 +81,7 @@ export default class Utils {
      * @param {Function} fn 执行体
      * @param {Number} threshhold 周期时间
      */
-    static throttle(fn, threshhold) {
+    static throttle(fn, threshhold, nowFn) {
         threshhold || (threshhold = 100);
         var last, timer;
         return function() {
@@ -95,6 +98,9 @@ export default class Utils {
             } else {
                 last = now;
                 fn.apply(context, args);
+            }
+            if (nowFn) {
+                return nowFn.apply(context, args);
             }
         };
     }

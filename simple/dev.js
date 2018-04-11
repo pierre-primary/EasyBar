@@ -108,7 +108,7 @@ var Utils = function () {
 
     }, {
         key: "debounce",
-        value: function debounce(fn, delay) {
+        value: function debounce(fn, delay, nowFn) {
             delay || (delay = 100);
             var timer = null;
             return function () {
@@ -118,6 +118,9 @@ var Utils = function () {
                 timer = setTimeout(function () {
                     fn.apply(context, args);
                 }, delay);
+                if (nowFn) {
+                    return nowFn.apply(context, args);
+                }
             };
         }
         /**
@@ -128,7 +131,7 @@ var Utils = function () {
 
     }, {
         key: "throttle",
-        value: function throttle(fn, threshhold) {
+        value: function throttle(fn, threshhold, nowFn) {
             threshhold || (threshhold = 100);
             var last, timer;
             return function () {
@@ -145,6 +148,9 @@ var Utils = function () {
                 } else {
                     last = now;
                     fn.apply(context, args);
+                }
+                if (nowFn) {
+                    return nowFn.apply(context, args);
                 }
             };
         }
@@ -174,10 +180,9 @@ var BrowserUtils = function () {
  * @author:Ybao
  */
 var DefConfig = {
-    minLenght: 50,
-    maxLenght: -1,
+    minLength: 50,
+    maxLength: -1,
     resizeRefresh: true,
-    unselectableBody: true,
     barfloat: false,
     preventParentScroll: false,
     scrollBarBehavior: null, //show|hide|none show|hide|none
@@ -242,7 +247,7 @@ styleInject(css);
  * @author:Ybao
  */
 
-var StrongNativeBarClass = "hide-native-bar";
+var HideNativeBarClass = "hide-native-bar";
 var IsFirefox = BrowserUtils.isFirefox();
 /**
  *
@@ -264,7 +269,7 @@ function getNativeScrollbarWidth() {
     var box = document.createElement("div");
     var cev = document.createElement("div");
 
-    box.className = StrongNativeBarClass;
+    box.className = HideNativeBarClass;
     box.style.position = "absolute";
     box.style.pointerEvents = "none";
     box.style.bottom = "0";
@@ -329,6 +334,8 @@ function careteMutationObserver(state) {
 function initScrollHandler(state) {
     if (!state.scrollHandler) {
         state.scrollHandler = Utils.throttle(function () {
+            computeArea(state);
+            updateScrollBar(state);
             updateScrollBar(state);
             withScrollingClass(state);
         }, state.config.scrollThrottle);
@@ -339,11 +346,50 @@ function initScrollHandler(state) {
  *
  * @param {*} state
  */
+function initMouseDown(state) {
+    if (!state.mouseDown) {
+        state.mouseDown = function (event) {
+            if (!event.targetTouches && event.which !== 1) {
+                return false;
+            }
+            var p = event.targetTouches ? event.targetTouches[0] : event;
+            if (state.vBar && this == state.vBar.scrollBarThumb) {
+                state.vBar.barDragging = true;
+                state.vBar.startMouse = p.clientY - state.vBar.scrollBarThumb.getBoundingClientRect().top;
+            } else if (state.hBar && this == state.hBar.scrollBarThumb) {
+                state.hBar.barDragging = true;
+                state.hBar.startMouse = p.clientX - state.hBar.scrollBarThumb.getBoundingClientRect().left;
+            } else {
+                return false;
+            }
+
+            Utils.addClass(state.scrollBox, state.config.clsBoxDragging);
+            state.draggingPhantomClassTimer && clearTimeout(state.draggingPhantomClassTimer);
+            Utils.addClass(state.scrollBox, state.config.clsBoxDraggingPhantomClass);
+
+            document.addEventListener("mousemove", state.mouseMove, 1);
+            document.addEventListener("mouseup", state.mouseUp, 1);
+            document.addEventListener("touchmove", state.mouseMove, 1);
+            document.addEventListener("touchend", state.mouseUp, 1);
+            event.preventDefault();
+            event.stopPropagation();
+        };
+    }
+}
+
+/**
+ *
+ * @param {*} state
+ */
 function initMouseMove(state) {
     if (!state.mouseMove) {
         state.mouseMove = Utils.throttle(function (event) {
-            onDragging(state, event);
-        }, state.config.draggerThrottle);
+            var p = event.targetTouches ? event.targetTouches[0] : event;
+            onDragging(state, p);
+        }, state.config.draggerThrottle, function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        });
     }
 }
 
@@ -353,12 +399,9 @@ function initMouseMove(state) {
  */
 function initMouseUp(state) {
     if (!state.mouseUp) {
-        state.mouseUp = function () {
+        state.mouseUp = function (event) {
             state.vBar && (state.vBar.barDragging = false);
             state.hBar && (state.hBar.barDragging = false);
-
-            Utils.compatStyle(state.scrollBox, "userSelect", "");
-            state.config.unselectableBody && Utils.compatStyle(document.body, "userSelect", "");
 
             Utils.removeClass(state.scrollBox, state.config.clsBoxDragging);
             state.draggingPhantomClassTimer && clearTimeout(state.draggingPhantomClassTimer);
@@ -367,8 +410,12 @@ function initMouseUp(state) {
                 state.draggingPhantomClassTimer && delete state.draggingPhantomClassTimer;
             }, state.config.draggingPhantomDelay);
 
-            document.removeEventListener("mousemove", state.mouseMove, 0);
-            document.removeEventListener("mouseup", state.mouseUp, 0);
+            document.removeEventListener("mousemove", state.mouseMove, 1);
+            document.removeEventListener("mouseup", state.mouseUp, 1);
+            document.removeEventListener("touchmove", state.mouseMove, 1);
+            document.removeEventListener("touchend", state.mouseUp, 1);
+            event.preventDefault();
+            event.stopPropagation();
         };
     }
 }
@@ -377,31 +424,71 @@ function initMouseUp(state) {
  *
  * @param {*} state
  */
-function initMouseDown(state) {
-    if (!state.mouseDown) {
-        state.mouseDown = function (event) {
-            if (event.which !== 1) {
-                return false;
-            }
-            if (state.vBar && this == state.vBar.scrollBarThumb) {
-                state.vBar.barDragging = true;
-                state.vBar.mouseBarOffset = event.offsetY;
-            }
-            if (state.hBar && this == state.hBar.scrollBarThumb) {
-                state.hBar.barDragging = true;
-                state.hBar.mouseBarOffset = event.offsetX;
-            }
+function bindWheelHandler(state) {
+    if (state.config.preventParentScroll) {
+        if (!state.wheelHandler) {
+            state.wheelHandler = function (event) {
+                if (state.visibleArea >= 1) {
+                    return false;
+                }
+                var scrollDistV = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
+                var scrollTop = state.scrollCevBox.scrollTop;
 
-            Utils.compatStyle(state.scrollBox, "userSelect", "none");
-            state.config.unselectableBody && Utils.compatStyle(document.body, "userSelect", "none");
+                var wheelingUp = event.deltaY < 0;
+                var wheelingDown = event.deltaY > 0;
+                if (scrollTop <= 0 && wheelingUp || scrollTop >= scrollDistV && wheelingDown) {
+                    event.preventDefault();
+                    return false;
+                }
 
-            Utils.addClass(state.scrollBox, state.config.clsBoxDragging);
-            state.draggingPhantomClassTimer && clearTimeout(state.draggingPhantomClassTimer);
-            Utils.addClass(state.scrollBox, state.config.clsBoxDraggingPhantomClass);
+                var scrollDistH = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
+                var scrollLeft = state.scrollCevBox.scrollLeft;
 
-            document.addEventListener("mousemove", state.mouseMove, 0);
-            document.addEventListener("mouseup", state.mouseUp, 0);
-        };
+                var wheelingLeft = event.deltaX < 0;
+                var wheelingRight = event.deltaX > 0;
+                if (scrollLeft <= 0 && wheelingLeft || scrollLeft >= scrollDistH && wheelingRight) {
+                    event.preventDefault();
+                    return false;
+                }
+                event.stopPropagation();
+                return true;
+            };
+            state.scrollCevBox.addEventListener("wheel", state.wheelHandler, 0);
+        }
+    } else {
+        unBindWheelHandler(state);
+    }
+}
+
+function unBindWheelHandler(state) {
+    if (state.wheelHandler) {
+        state.scrollCevBox.removeEventListener("wheel", state.wheelHandler, 0);
+        delete state.wheelHandler;
+    }
+}
+
+/**
+ *
+ * @param {*} state
+ */
+function bindResizeHandler(state) {
+    if (state.config.resizeRefresh) {
+        if (!state.resizeHandler) {
+            state.resizeHandler = Utils.debounce(function () {
+                _refreshBar(state);
+            }, state.config.resizeDebounce);
+
+            window.addEventListener("resize", state.resizeHandler, 0);
+        }
+    } else {
+        unBindResizeHandler(state);
+    }
+}
+
+function unBindResizeHandler(state) {
+    if (state.resizeHandler) {
+        window.removeEventListener("resize", state.resizeHandler, 0);
+        delete state.resizeHandler;
     }
 }
 
@@ -412,6 +499,7 @@ function initMouseDown(state) {
 function bindScrollBox(state) {
     if (!state.scrollCevBox) {
         state.scrollBox = state.rootEl;
+        state.scrollBoxClip = document.createElement("div");
         state.scrollCev = state.rootEl.firstElementChild;
         state.scrollCevBox = document.createElement("div");
 
@@ -419,8 +507,12 @@ function bindScrollBox(state) {
         state.scrollBox.style.position = "relative";
         state.scrollBox.style.overflow = "hidden";
 
+        state.scrollBoxClip.style.height = "100%";
+        state.scrollBoxClip.style.width = "100%";
+        state.scrollBoxClip.style.overflow = "hidden";
+
         Utils.addClass(state.scrollCevBox, state.config.clsContent);
-        Utils.addClass(state.scrollCevBox, StrongNativeBarClass);
+        Utils.addClass(state.scrollCevBox, HideNativeBarClass);
         state.scrollCevBox.style.display = "block";
         state.scrollCevBox.style.overflow = "hidden";
         state.scrollCevBox.style.height = "100%";
@@ -428,7 +520,8 @@ function bindScrollBox(state) {
 
         state.scrollBox.removeChild(state.scrollCev);
         state.scrollCevBox.appendChild(state.scrollCev);
-        state.scrollBox.appendChild(state.scrollCevBox);
+        state.scrollBoxClip.appendChild(state.scrollCevBox);
+        state.scrollBox.appendChild(state.scrollBoxClip);
 
         state.scrollCevBox.addEventListener("scroll", state.scrollHandler, 0);
 
@@ -449,7 +542,7 @@ function unBindScrollBox(state) {
 
         state.scrollCev.style.display = "";
 
-        state.scrollBox.removeChild(state.scrollCevBox);
+        state.scrollBox.removeChild(state.scrollBoxClip);
         state.scrollCevBox.removeChild(state.scrollCev);
         state.scrollBox.appendChild(state.scrollCev);
 
@@ -460,9 +553,10 @@ function unBindScrollBox(state) {
             delete state.mutationObserver;
         }
 
-        delete state.scrollBox;
         delete state.scrollCev;
         delete state.scrollCevBox;
+        delete state.scrollBoxClip;
+        delete state.scrollBox;
     }
 }
 
@@ -479,8 +573,10 @@ function bindScrollBar(state) {
                 scrollBarTrack: bar.scrollBarTrack,
                 scrollBarThumb: bar.scrollBarThumb
             };
+            Utils.compatStyle(state.vBar.scrollBarTrack, "userSelect", "none");
             state.scrollBox.appendChild(state.vBar.scrollBarTrack);
             state.vBar.scrollBarThumb.addEventListener("mousedown", state.mouseDown, 0);
+            state.vBar.scrollBarThumb.addEventListener("touchstart", state.mouseDown, 0);
         }
         state.vBar.scrollBarTrack.className = state.config.clsTrackV;
         state.vBar.scrollBarThumb.className = state.config.clsThumbV;
@@ -494,8 +590,10 @@ function bindScrollBar(state) {
                 scrollBarTrack: bar.scrollBarTrack,
                 scrollBarThumb: bar.scrollBarThumb
             };
+            Utils.compatStyle(state.hBar.scrollBarTrack, "userSelect", "none");
             state.scrollBox.appendChild(state.hBar.scrollBarTrack);
             state.hBar.scrollBarThumb.addEventListener("mousedown", state.mouseDown, 0);
+            state.hBar.scrollBarThumb.addEventListener("touchstart", state.mouseDown, 0);
         }
         state.hBar.scrollBarTrack.className = state.config.clsTrackH;
         state.hBar.scrollBarThumb.className = state.config.clsThumbH;
@@ -546,6 +644,7 @@ function unBindScrollBar(state) {
 function unBindScrollBarV(state) {
     if (state.vBar) {
         state.vBar.scrollBarThumb.removeEventListener("mousedown", state.mouseDown, 0);
+        state.vBar.scrollBarThumb.removeEventListener("touchstart", state.mouseDown, 0);
         state.scrollBox.removeChild(state.vBar.scrollBarTrack);
         delete state.vBar;
     }
@@ -554,6 +653,7 @@ function unBindScrollBarV(state) {
 function unBindScrollBarH(state) {
     if (state.hBar) {
         state.hBar.scrollBarThumb.removeEventListener("mousedown", state.mouseDown, 0);
+        state.hBar.scrollBarThumb.removeEventListener("touchstart", state.mouseDown, 0);
         state.scrollBox.removeChild(state.hBar.scrollBarTrack);
         delete state.hBar;
     }
@@ -564,26 +664,26 @@ function unBindScrollBarH(state) {
  * @param {*} state
  */
 function computeArea(state) {
-    var bar, visibleArea, _barLenght, barLenght, minBarBoxLenght;
+    var bar, visibleArea, _barLength, barLength, minBarBoxLength;
     if (bar = state.vBar) {
         visibleArea = state.scrollCevBox.scrollHeight == 0 ? 1 : state.scrollCevBox.clientHeight / state.scrollCevBox.scrollHeight;
         bar.scrollOffsetArea = visibleArea;
-        bar.barBoxLenght = bar.scrollBarTrack.clientHeight;
+        bar.barBoxLength = bar.scrollBarTrack.clientHeight;
 
         if (visibleArea >= 1) {
-            bar.barLenght = 0;
+            bar.barLength = 0;
 
             Utils.removeClass(state.scrollBox, state.config.clsBoxVisibleBarV);
             Utils.addClass(state.scrollBox, state.config.clsBoxInvisibleBarV);
         } else {
-            _barLenght = bar.scrollBarTrack.clientHeight * visibleArea;
-            barLenght = _barLenght;
-            barLenght = state.config.minLenght > 0 && state.config.minLenght > barLenght ? state.config.minLenght : barLenght;
-            barLenght = state.config.maxLenght > 0 && state.config.maxLenght < barLenght ? state.config.maxLenght : barLenght;
-            bar.barLenght = barLenght;
-            minBarBoxLenght = (state.config.minLenght > 0 ? state.config.minLenght : 0) + 100;
-            bar.barBoxLenght = minBarBoxLenght > bar.scrollBarTrack.clientHeight ? minBarBoxLenght : bar.scrollBarTrack.clientHeight;
-            bar.scrollOffsetArea = (bar.barBoxLenght - barLenght) / (bar.scrollBarTrack.clientHeight - _barLenght) * (bar.scrollBarTrack.clientHeight / state.scrollCevBox.scrollHeight);
+            _barLength = bar.scrollBarTrack.clientHeight * visibleArea;
+            barLength = _barLength;
+            barLength = state.config.minLength > 0 && state.config.minLength > barLength ? state.config.minLength : barLength;
+            barLength = state.config.maxLength > 0 && state.config.maxLength < barLength ? state.config.maxLength : barLength;
+            bar.barLength = barLength;
+            minBarBoxLength = (state.config.minLength > 0 ? state.config.minLength : 0) + 100;
+            bar.barBoxLength = minBarBoxLength > bar.scrollBarTrack.clientHeight ? minBarBoxLength : bar.scrollBarTrack.clientHeight;
+            bar.scrollOffsetArea = (bar.barBoxLength - barLength) / (bar.scrollBarTrack.clientHeight - _barLength) * (bar.scrollBarTrack.clientHeight / state.scrollCevBox.scrollHeight);
 
             Utils.removeClass(state.scrollBox, state.config.clsBoxInvisibleBarV);
             Utils.addClass(state.scrollBox, state.config.clsBoxVisibleBarV);
@@ -593,21 +693,21 @@ function computeArea(state) {
     if (bar = state.hBar) {
         visibleArea = state.scrollCevBox.scrollWidth == 0 ? 1 : state.scrollCevBox.clientWidth / state.scrollCevBox.scrollWidth;
         bar.scrollOffsetArea = visibleArea;
-        bar.barBoxLenght = bar.scrollBarTrack.clientWidth;
+        bar.barBoxLength = bar.scrollBarTrack.clientWidth;
         if (visibleArea >= 1) {
-            bar.barLenght = 0;
+            bar.barLength = 0;
 
             Utils.removeClass(state.scrollBox, state.config.clsBoxVisibleBarH);
             Utils.addClass(state.scrollBox, state.config.clsBoxInvisibleBarH);
         } else {
-            _barLenght = bar.scrollBarTrack.clientWidth * visibleArea;
-            barLenght = _barLenght;
-            barLenght = state.config.minLenght > 0 && state.config.minLenght > barLenght ? state.config.minLenght : barLenght;
-            barLenght = state.config.maxLenght > 0 && state.config.maxLenght < barLenght ? state.config.maxLenght : barLenght;
-            bar.barLenght = barLenght;
-            minBarBoxLenght = (state.config.minLenght > 0 ? state.config.minLenght : 0) + 100;
-            bar.barBoxLenght = minBarBoxLenght > bar.scrollBarTrack.clientWidth ? minBarBoxLenght : bar.scrollBarTrack.clientWidth;
-            bar.scrollOffsetArea = (bar.barBoxLenght - barLenght) / (bar.scrollBarTrack.clientWidth - _barLenght) * (bar.scrollBarTrack.clientWidth / state.scrollCevBox.scrollWidth);
+            _barLength = bar.scrollBarTrack.clientWidth * visibleArea;
+            barLength = _barLength;
+            barLength = state.config.minLength > 0 && state.config.minLength > barLength ? state.config.minLength : barLength;
+            barLength = state.config.maxLength > 0 && state.config.maxLength < barLength ? state.config.maxLength : barLength;
+            bar.barLength = barLength;
+            minBarBoxLength = (state.config.minLength > 0 ? state.config.minLength : 0) + 100;
+            bar.barBoxLength = minBarBoxLength > bar.scrollBarTrack.clientWidth ? minBarBoxLength : bar.scrollBarTrack.clientWidth;
+            bar.scrollOffsetArea = (bar.barBoxLength - barLength) / (bar.scrollBarTrack.clientWidth - _barLength) * (bar.scrollBarTrack.clientWidth / state.scrollCevBox.scrollWidth);
 
             Utils.removeClass(state.scrollBox, state.config.clsBoxInvisibleBarH);
             Utils.addClass(state.scrollBox, state.config.clsBoxVisibleBarH);
@@ -624,14 +724,14 @@ function updateScrollBar(state) {
     if (bar = state.vBar) {
         bar.barOffset = state.scrollCevBox.scrollTop * bar.scrollOffsetArea;
 
-        bar.scrollBarThumb.style.height = parseInt(Math.round(bar.barLenght)) + "px";
+        bar.scrollBarThumb.style.height = parseInt(Math.round(bar.barLength)) + "px";
         bar.scrollBarThumb.style.top = parseInt(Math.round(bar.barOffset)) + "px";
     }
 
     if (bar = state.hBar) {
         bar.barOffset = state.scrollCevBox.scrollLeft * bar.scrollOffsetArea;
 
-        bar.scrollBarThumb.style.width = parseInt(Math.round(bar.barLenght)) + "px";
+        bar.scrollBarThumb.style.width = parseInt(Math.round(bar.barLength)) + "px";
         bar.scrollBarThumb.style.left = parseInt(Math.round(bar.barOffset)) + "px";
     }
 }
@@ -640,37 +740,37 @@ function updateScrollBar(state) {
  *
  * @param {*} state
  */
-function onDragging(state, event) {
+function onDragging(state, p) {
     var handlerEvent = false;
     var bar, relativeMouse;
     if ((bar = state.vBar) && bar.barDragging) {
-        relativeMouse = event.clientY - state.scrollBox.getBoundingClientRect().top;
-        if (relativeMouse <= bar.mouseBarOffset) {
+        relativeMouse = p.clientY - bar.scrollBarTrack.getBoundingClientRect().top;
+        if (relativeMouse <= bar.startMouse) {
             bar.barOffset = 0;
         }
 
-        if (relativeMouse > bar.mouseBarOffset) {
-            bar.barOffset = relativeMouse - bar.mouseBarOffset;
+        if (relativeMouse > bar.startMouse) {
+            bar.barOffset = relativeMouse - bar.startMouse;
         }
 
-        if (bar.barOffset + bar.barLenght >= bar.barBoxLenght) {
-            bar.barOffset = bar.barBoxLenght - bar.barLenght;
+        if (bar.barOffset + bar.barLength >= bar.barBoxLength) {
+            bar.barOffset = bar.barBoxLength - bar.barLength;
         }
         state.scrollCevBox.scrollTop = bar.barOffset / bar.scrollOffsetArea;
         handlerEvent = true;
     }
     if ((bar = state.hBar) && bar.barDragging) {
-        relativeMouse = event.clientX - state.scrollBox.getBoundingClientRect().left;
-        if (relativeMouse <= bar.mouseBarOffset) {
+        relativeMouse = p.clientX - bar.scrollBarTrack.getBoundingClientRect().left;
+        if (relativeMouse <= bar.startMouse) {
             bar.barOffset = 0;
         }
 
-        if (relativeMouse > bar.mouseBarOffset) {
-            bar.barOffset = relativeMouse - bar.mouseBarOffset;
+        if (relativeMouse > bar.startMouse) {
+            bar.barOffset = relativeMouse - bar.startMouse;
         }
 
-        if (bar.barOffset + bar.barLenght >= bar.barBoxLenght) {
-            bar.barOffset = bar.barBoxLenght - bar.barLenght;
+        if (bar.barOffset + bar.barLength >= bar.barBoxLength) {
+            bar.barOffset = bar.barBoxLength - bar.barLength;
         }
         state.scrollCevBox.scrollLeft = bar.barOffset / bar.scrollOffsetArea;
         handlerEvent = true;
@@ -700,71 +800,20 @@ function clearBarTimeout(state) {
     state.scrollingPhantomClassTimeout && clearTimeout(state.scrollingPhantomClassTimeout);
 }
 
-/**
- *
- * @param {*} state
- */
-function bindWheelHandler(state) {
-    if (state.config.preventParentScroll) {
-        if (!state.wheelHandler) {
-            state.wheelHandler = function (event) {
-                if (state.visibleArea >= 1) {
-                    return false;
-                }
-
-                var scrollDist = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
-                var scrollTop = state.scrollCevBox.scrollTop;
-
-                var wheelingUp = event.deltaY < 0;
-                var wheelingDown = event.deltaY > 0;
-
-                if (scrollTop <= 0 && wheelingUp) {
-                    event.preventDefault();
-                    return false;
-                }
-
-                if (scrollTop >= scrollDist && wheelingDown) {
-                    event.preventDefault();
-                    return false;
-                }
-            };
-            state.scrollCevBox.addEventListener("wheel", state.wheelHandler, 0);
-        }
-    } else {
-        unBindWheelHandler(state);
-    }
+function init(state, nextTickHandler) {
+    state.nextTickHandler = nextTickHandler;
+    initScrollHandler(state);
+    initMouseDown(state);
+    initMouseMove(state);
+    initMouseUp(state);
 }
 
-function unBindWheelHandler(state) {
-    if (state.wheelHandler) {
-        state.scrollCevBox.removeEventListener("wheel", state.wheelHandler, 0);
-        delete state.wheelHandler;
-    }
-}
+function create(state) {
+    bindScrollBox(state);
+    bindScrollBar(state);
 
-/**
- *
- * @param {*} state
- */
-function bindResizeHandler(state) {
-    if (state.config.resizeRefresh) {
-        if (!state.resizeHandler) {
-            state.resizeHandler = Utils.debounce(function () {
-                _refreshBar(state);
-            }, state.config.resizeDebounce);
-
-            window.addEventListener("resize", state.resizeHandler, 0);
-        }
-    } else {
-        unBindResizeHandler(state);
-    }
-}
-
-function unBindResizeHandler(state) {
-    if (state.resizeHandler) {
-        window.removeEventListener("resize", state.resizeHandler, 0);
-        delete state.resizeHandler;
-    }
+    bindWheelHandler(state);
+    bindResizeHandler(state);
 }
 
 /**
@@ -784,22 +833,6 @@ function _refreshBar(state) {
     } else {
         refreshFn();
     }
-}
-
-function init(state, nextTickHandler) {
-    state.nextTickHandler = nextTickHandler;
-    initScrollHandler(state);
-    initMouseDown(state);
-    initMouseMove(state);
-    initMouseUp(state);
-}
-
-function create(state) {
-    bindScrollBox(state);
-    bindScrollBar(state);
-
-    bindWheelHandler(state);
-    bindResizeHandler(state);
 }
 
 function destroy(state) {
