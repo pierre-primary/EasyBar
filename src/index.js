@@ -716,7 +716,7 @@ function setOptions(state, options) {
 }
 
 export default class EasyBar {
-    constructor(el, options, nextTickHandler) {
+    constructor(el, nextTickHandler) {
         if (!checkCevEl(el)) {
             return {};
         }
@@ -724,27 +724,33 @@ export default class EasyBar {
         this.config = Object.assign({}, DefConfig);
 
         init(this, nextTickHandler);
+    }
 
+    bind(options) {
         this.update(options);
+        return this;
     }
 
     update(options) {
         setOptions(this, options);
         create(this);
         refreshBar(this);
+        return this;
     }
 
     refreshBar() {
         refreshBar(this);
+        return this;
     }
 
-    destroy() {
+    unBind() {
         destroy(this);
+        return this;
     }
 
     static bind(el, options, nextTickHandler) {
         if (!el._easyBar) {
-            el._easyBar = new EasyBar(el, options, nextTickHandler);
+            el._easyBar = new EasyBar(el, nextTickHandler).bind(options);
         }
         return el._easyBar;
     }
@@ -755,13 +761,6 @@ export default class EasyBar {
         }
     }
 
-    static unBind(el) {
-        if (el._easyBar) {
-            el._easyBar.destroy();
-            delete el._easyBar;
-        }
-    }
-
     static get(el) {
         return el._easyBar;
     }
@@ -769,6 +768,13 @@ export default class EasyBar {
     static refreshBar(el) {
         if (el._easyBar) {
             el._easyBar.refreshBar();
+        }
+    }
+
+    static unBind(el) {
+        if (el._easyBar) {
+            el._easyBar.unBind();
+            delete el._easyBar;
         }
     }
 

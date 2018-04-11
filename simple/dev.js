@@ -789,7 +789,7 @@ function create(state) {
     bindResizeHandler(state);
 }
 
-function _destroy(state) {
+function destroy(state) {
     clearBarTimeout(state);
     unBindResizeHandler(state);
     unBindWheelHandler(state);
@@ -851,7 +851,7 @@ function setOptions(state, options) {
 }
 
 var EasyBar = function () {
-    function EasyBar(el, options, nextTickHandler) {
+    function EasyBar(el, nextTickHandler) {
         classCallCheck(this, EasyBar);
 
         if (!checkCevEl(el)) {
@@ -861,32 +861,39 @@ var EasyBar = function () {
         this.config = Object.assign({}, DefConfig);
 
         init(this, nextTickHandler);
-
-        this.update(options);
     }
 
     createClass(EasyBar, [{
+        key: "bind",
+        value: function bind(options) {
+            this.update(options);
+            return this;
+        }
+    }, {
         key: "update",
         value: function update(options) {
             setOptions(this, options);
             create(this);
             _refreshBar(this);
+            return this;
         }
     }, {
         key: "refreshBar",
         value: function refreshBar() {
             _refreshBar(this);
+            return this;
         }
     }, {
-        key: "destroy",
-        value: function destroy() {
-            _destroy(this);
+        key: "unBind",
+        value: function unBind() {
+            destroy(this);
+            return this;
         }
     }], [{
         key: "bind",
         value: function bind(el, options, nextTickHandler) {
             if (!el._easyBar) {
-                el._easyBar = new EasyBar(el, options, nextTickHandler);
+                el._easyBar = new EasyBar(el, nextTickHandler).bind(options);
             }
             return el._easyBar;
         }
@@ -895,14 +902,6 @@ var EasyBar = function () {
         value: function update(el, options) {
             if (el._easyBar) {
                 el._easyBar.update(options);
-            }
-        }
-    }, {
-        key: "unBind",
-        value: function unBind(el) {
-            if (el._easyBar) {
-                el._easyBar.destroy();
-                delete el._easyBar;
             }
         }
     }, {
@@ -915,6 +914,14 @@ var EasyBar = function () {
         value: function refreshBar(el) {
             if (el._easyBar) {
                 el._easyBar.refreshBar();
+            }
+        }
+    }, {
+        key: "unBind",
+        value: function unBind(el) {
+            if (el._easyBar) {
+                el._easyBar.unBind();
+                delete el._easyBar;
             }
         }
     }, {
