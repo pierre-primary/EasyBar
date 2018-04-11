@@ -14,6 +14,12 @@
             "type": "npm",
             "script": "build",
             "problemMatcher": []
+        },
+        {
+            "label": "build-min",
+            "type": "npm",
+            "script": "build-min",
+            "problemMatcher": []
         }
     ]
 }
