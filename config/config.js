@@ -6,5 +6,5 @@ export default {
     srcPath: "src",
     testHost: "localhost",
     testPort: 8080,
-    testBasePath: "simple"
+    testBasePath: "test"
 };
