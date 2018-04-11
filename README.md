@@ -12,11 +12,11 @@ js 实现的浏览器自定义 ScrollBar 工具
 
 ### 2、获得
 
-build:构建
+npm build:构建
 
-build-min:构建压缩
+npm build-min:构建压缩
 
-start:运行开启服务,查看示例 http://localhost:8080/
+npm start:运行开启服务,查看示例 http://localhost:8080/
 
 ***
 
