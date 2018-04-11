@@ -7,7 +7,9 @@
 ### 1、简介
 
 js 实现的浏览器自定义 ScrollBar 工具
+
 [Demo](https://y-bao.github.io/EasyBar/simple/)
+
 ---
 
 ### 2、获得
