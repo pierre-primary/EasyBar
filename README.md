@@ -4,32 +4,35 @@
 
 ***
 
-####1、简介
+#### 1、简介
 
 js 实现的浏览器自定义 ScrollBar 工具
 
 ***
 
-####2、获得
+#### 2、获得
 
 build:构建
+
 build-min:构建压缩
+
 start:运行开启服务,查看示例 http://localhost:8080/
 
 ***
 
-####3、兼容性
+#### 3、兼容性
 
 电脑端：主流浏览器全部兼容；
+
 移动端：除了火狐手机版外都兼容；
 
 ***
 
-####4、快速使用
+#### 4、快速使用
 
 根据开发场景选择对应的版本.browser.js|.modeule.js|.umd.js
 
-#####4.1、HTML-JS-CSS
+##### 4.1、HTML-JS-CSS
 
 引入
 ```html
@@ -69,7 +72,7 @@ bar.refreshBar();
 bar.unBind();
 ```
 
-#####4.2、Vue
+##### 4.2、Vue
 
 引入
 ```javascript
@@ -84,14 +87,14 @@ Vue.use(EasyBar);
 </div>
 ```
 
-#####4.3、其他
+##### 4.3、其他
 
 请自行封装
 
-####5、参数说明
+#### 5、参数说明
 
 后补
 
-####6、感谢
+#### 6、感谢
 
 vuebar:https://github.com/DominikSerafin/vuebar
