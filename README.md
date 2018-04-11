@@ -71,3 +71,6 @@ Vue.use(EasyBar);
 
 ####5、参数说明
 后补
+
+####6、感谢
+vuebar:https://github.com/DominikSerafin/vuebar

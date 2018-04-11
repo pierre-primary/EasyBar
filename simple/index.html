@@ -13,12 +13,16 @@
 </head>
 
 <body>
-    <div id="fff" style="width:400px; height:400px;">
+    <div id="el1" style="width:400px; height:400px;">
         <div style="width:600px; height:600px;"></div>
     </div>
 </body>
 <script>
-    EasyBar.bind(document.getElementById("fff"));
+    var el = document.getElementById("el1");
+    var bar = new EasyBar(el);
+    bar.bind({
+        minLenght: 50
+    });
 
 </script>
 
