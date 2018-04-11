@@ -1,3 +1,6 @@
+/**
+ * @author:Ybao
+ */
 .hide-native-bar::-webkit-scrollbar {
     display: none;
 }

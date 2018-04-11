@@ -1,3 +1,7 @@
+/**
+ * @author:Ybao
+ */
+
 import Utils from "./utils/utils.js";
 import BrowserHelper from "./utils/browser.js";
 import DefConfig from "./config.js";

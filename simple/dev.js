@@ -32,6 +32,9 @@ var createClass = function () {
   };
 }();
 
+/**
+ * @author:Ybao
+ */
 var Utils = function () {
     function Utils() {
         classCallCheck(this, Utils);
@@ -149,6 +152,9 @@ var Utils = function () {
     return Utils;
 }();
 
+/**
+ * @author:Ybao
+ */
 var BrowserUtils = function () {
     function BrowserUtils() {
         classCallCheck(this, BrowserUtils);
@@ -164,6 +170,9 @@ var BrowserUtils = function () {
     return BrowserUtils;
 }();
 
+/**
+ * @author:Ybao
+ */
 var DefConfig = {
     minLenght: 50,
     maxLenght: -1,
@@ -228,6 +237,10 @@ function styleInject(css, ref) {
 
 var css = ".hide-native-bar::-webkit-scrollbar{display:none}.hide-native-bar::-o-scrollbar{display:none}.hide-native-bar{-ms-overflow-style:none}.eb>.eb-track-h,.eb>.eb-track-v{-webkit-transition:background-color .3s;transition:background-color .3s;z-index:1;border-radius:20px}.eb>.eb-track-v{width:8px;top:5px;right:5px;height:calc(100% - 20px)}.eb>.eb-track-h{height:8px;left:5px;bottom:5px;width:calc(100% - 20px)}.eb.eb-visible-h.eb-scrolling-phantom>.eb-track-h,.eb.eb-visible-h>.eb-track-h:hover,.eb.eb-visible-v.eb-scrolling-phantom>.eb-track-v,.eb.eb-visible-v>.eb-track-v:hover{-webkit-transition:background-color .1s;transition:background-color .1s;background-color:rgba(0,0,0,.1)}.eb.eb-visible-h>.eb-track-h>.eb-thumb-h,.eb.eb-visible-v>.eb-track-v>.eb-thumb-v{-webkit-transition:background-color .3s;transition:background-color .3s;background-color:rgba(0,0,0,.15);border-radius:20px;display:block}.eb>.eb-track-v>.eb-thumb-v{width:100%}.eb>.eb-track-h>.eb-thumb-h{height:100%}.eb.eb-visible-h.eb-scrolling-phantom>.eb-track-h>.eb-thumb-h,.eb.eb-visible-h>.eb-track-h:hover>.eb-thumb-h,.eb.eb-visible-v.eb-scrolling-phantom>.eb-track-v>.eb-thumb-v,.eb.eb-visible-v>.eb-track-v:hover>.eb-thumb-v{-webkit-transition:background-color .1s;transition:background-color .1s;background-color:rgba(0,0,0,.3)}";
 styleInject(css);
+
+/**
+ * @author:Ybao
+ */
 
 var StrongNativeBarClass = "hide-native-bar";
 var IsFirefox = BrowserUtils.isFirefox();

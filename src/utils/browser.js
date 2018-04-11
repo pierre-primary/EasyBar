@@ -1,3 +1,6 @@
+/**
+ * @author:Ybao
+ */
 export default class BrowserUtils {
     static isFirefox() {
         var ua = window.navigator.userAgent;

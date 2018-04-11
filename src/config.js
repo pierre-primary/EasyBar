@@ -1,3 +1,6 @@
+/**
+ * @author:Ybao
+ */
 export default {
     minLenght: 50,
     maxLenght: -1,

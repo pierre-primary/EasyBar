@@ -1,3 +1,6 @@
+/**
+ * @author:Ybao
+ */
 export default class Utils {
     /**
      * 判断元素是否存在对应的类
