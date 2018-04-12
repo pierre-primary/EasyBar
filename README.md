@@ -90,7 +90,7 @@ Vue.use(EasyBar);
 使用
 
 ```html
-<div style="width:500px; height:500px;" v-bar="{ minLength: 50}">
+<div style="width:500px; height:500px;" v-bar>
     <div style="width:600px; height:600px;"></div>
 </div>
 ```
