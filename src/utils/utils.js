@@ -61,16 +61,20 @@ export default class Utils {
      * @param {Function} fn 执行体
      * @param {Number} delay 周期时间
      */
-    static debounce(fn, delay, nowFn) {
-        delay || (delay = 100);
+    static debounce(fn, delayFn, nowFn) {
         var timer = null;
         return function() {
             var context = this,
                 args = arguments;
             clearTimeout(timer);
-            timer = setTimeout(function() {
+            var delay = delayFn ? delayFn.apply(context, args) : undefined;
+            if (delay) {
+                timer = setTimeout(() => {
+                    fn.apply(context, args);
+                }, delay);
+            } else {
                 fn.apply(context, args);
-            }, delay);
+            }
             if (nowFn) {
                 return nowFn.apply(context, args);
             }
@@ -81,17 +85,18 @@ export default class Utils {
      * @param {Function} fn 执行体
      * @param {Number} threshhold 周期时间
      */
-    static throttle(fn, threshhold, nowFn) {
-        threshhold || (threshhold = 100);
+    static throttle(fn, threshholdFn, nowFn) {
         var last, timer;
         return function() {
             var context = this;
             var now = +new Date(),
                 args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
+            var threshhold = threshholdFn
+                ? threshholdFn.apply(context, args)
+                : undefined;
+            if (last && threshhold && now < last + threshhold) {
                 clearTimeout(timer);
-                timer = setTimeout(function() {
+                timer = setTimeout(() => {
                     last = now;
                     fn.apply(context, args);
                 }, threshhold);

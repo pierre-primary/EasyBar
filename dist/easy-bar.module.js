@@ -108,16 +108,20 @@ var Utils = function () {
 
     }, {
         key: "debounce",
-        value: function debounce(fn, delay, nowFn) {
-            delay || (delay = 100);
+        value: function debounce(fn, delayFn, nowFn) {
             var timer = null;
             return function () {
                 var context = this,
                     args = arguments;
                 clearTimeout(timer);
-                timer = setTimeout(function () {
+                var delay = delayFn ? delayFn.apply(context, args) : undefined;
+                if (delay) {
+                    timer = setTimeout(function () {
+                        fn.apply(context, args);
+                    }, delay);
+                } else {
                     fn.apply(context, args);
-                }, delay);
+                }
                 if (nowFn) {
                     return nowFn.apply(context, args);
                 }
@@ -131,15 +135,14 @@ var Utils = function () {
 
     }, {
         key: "throttle",
-        value: function throttle(fn, threshhold, nowFn) {
-            threshhold || (threshhold = 100);
+        value: function throttle(fn, threshholdFn, nowFn) {
             var last, timer;
             return function () {
                 var context = this;
                 var now = +new Date(),
                     args = arguments;
-                if (last && now < last + threshhold) {
-                    // hold on to it
+                var threshhold = threshholdFn ? threshholdFn.apply(context, args) : undefined;
+                if (last && threshhold && now < last + threshhold) {
                     clearTimeout(timer);
                     timer = setTimeout(function () {
                         last = now;
@@ -324,7 +327,9 @@ function careteMutationObserver(state) {
 
     return new MutationObserver(Utils.throttle(function () {
         _refreshBar(state);
-    }, state.config.observerThrottle));
+    }, function () {
+        return state.config.observerThrottle;
+    }));
 }
 
 /**
@@ -338,7 +343,9 @@ function initScrollHandler(state) {
             updateScrollBar(state);
             updateScrollBar(state);
             withScrollingClass(state);
-        }, state.config.scrollThrottle);
+        }, function () {
+            return state.config.scrollThrottle;
+        });
     }
 }
 
@@ -386,7 +393,9 @@ function initMouseMove(state) {
         state.mouseMove = Utils.throttle(function (event) {
             var p = event.targetTouches ? event.targetTouches[0] : event;
             onDragging(state, p);
-        }, state.config.draggerThrottle, function (event) {
+        }, function () {
+            return state.config.draggerThrottle;
+        }, function (event) {
             event.preventDefault();
             event.stopPropagation();
         });
@@ -476,7 +485,9 @@ function bindResizeHandler(state) {
         if (!state.resizeHandler) {
             state.resizeHandler = Utils.debounce(function () {
                 _refreshBar(state);
-            }, state.config.resizeDebounce);
+            }, function () {
+                return state.config.resizeDebounce;
+            });
 
             window.addEventListener("resize", state.resizeHandler, 0);
         }
@@ -904,7 +915,9 @@ var EasyBar = function () {
             return {};
         }
         this.rootEl = el;
-        this.config = Object.assign({}, DefConfig);
+
+        this.config = {};
+        setOptions(this, DefConfig);
 
         init(this, nextTickHandler);
     }

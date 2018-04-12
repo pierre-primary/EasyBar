@@ -84,9 +84,14 @@ function careteMutationObserver(state) {
     }
 
     return new MutationObserver(
-        Utils.throttle(function() {
-            refreshBar(state);
-        }, state.config.observerThrottle)
+        Utils.throttle(
+            function() {
+                refreshBar(state);
+            },
+            function() {
+                return state.config.observerThrottle;
+            }
+        )
     );
 }
 
@@ -96,12 +101,17 @@ function careteMutationObserver(state) {
  */
 function initScrollHandler(state) {
     if (!state.scrollHandler) {
-        state.scrollHandler = Utils.throttle(function() {
-            computeArea(state);
-            updateScrollBar(state);
-            updateScrollBar(state);
-            withScrollingClass(state);
-        }, state.config.scrollThrottle);
+        state.scrollHandler = Utils.throttle(
+            function() {
+                computeArea(state);
+                updateScrollBar(state);
+                updateScrollBar(state);
+                withScrollingClass(state);
+            },
+            function() {
+                return state.config.scrollThrottle;
+            }
+        );
     }
 }
 
@@ -155,12 +165,14 @@ function initMouseDown(state) {
 function initMouseMove(state) {
     if (!state.mouseMove) {
         state.mouseMove = Utils.throttle(
-            event => {
+            function(event) {
                 var p = event.targetTouches ? event.targetTouches[0] : event;
                 onDragging(state, p);
             },
-            state.config.draggerThrottle,
-            event => {
+            function() {
+                return state.config.draggerThrottle;
+            },
+            function(event) {
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -181,7 +193,7 @@ function initMouseUp(state) {
             Utils.removeClass(state.scrollBox, state.config.clsBoxDragging);
             state.draggingPhantomClassTimer &&
                 clearTimeout(state.draggingPhantomClassTimer);
-            state.draggingPhantomClassTimer = setTimeout(function() {
+            state.draggingPhantomClassTimer = setTimeout(() => {
                 Utils.removeClass(
                     state.scrollBox,
                     state.config.clsBoxDraggingPhantomClass
@@ -264,9 +276,14 @@ function unBindWheelHandler(state) {
 function bindResizeHandler(state) {
     if (state.config.resizeRefresh) {
         if (!state.resizeHandler) {
-            state.resizeHandler = Utils.debounce(function() {
-                refreshBar(state);
-            }, state.config.resizeDebounce);
+            state.resizeHandler = Utils.debounce(
+                function() {
+                    refreshBar(state);
+                },
+                function() {
+                    return state.config.resizeDebounce;
+                }
+            );
 
             window.addEventListener("resize", state.resizeHandler, 0);
         }
@@ -656,7 +673,7 @@ function onDragging(state, p) {
 function withScrollingClass(state) {
     state.scrollingClassTimeout && clearTimeout(state.scrollingClassTimeout);
     Utils.addClass(state.scrollBox, state.config.clsBoxScrolling);
-    state.scrollingClassTimeout = setTimeout(function() {
+    state.scrollingClassTimeout = setTimeout(() => {
         Utils.removeClass(state.scrollBox, state.config.clsBoxScrolling);
         state.scrollingClassTimeout && delete state.scrollingClassTimeout;
     }, state.config.scrollThrottle + 5);
@@ -664,7 +681,7 @@ function withScrollingClass(state) {
     state.scrollingPhantomClassTimeout &&
         clearTimeout(state.scrollingPhantomClassTimeout);
     Utils.addClass(state.scrollBox, state.config.clsBoxScrollingPhantom);
-    state.scrollingPhantomClassTimeout = setTimeout(function() {
+    state.scrollingPhantomClassTimeout = setTimeout(() => {
         Utils.removeClass(state.scrollBox, state.config.clsBoxScrollingPhantom);
         state.scrollingPhantomClassTimeout &&
             delete state.scrollingPhantomClassTimeout;
@@ -700,7 +717,7 @@ function create(state) {
  * @param {*} state
  */
 function refreshBar(state) {
-    var refreshFn = function() {
+    var refreshFn = () => {
         if (!state) {
             return;
         }
@@ -783,7 +800,9 @@ export default class EasyBar {
             return {};
         }
         this.rootEl = el;
-        this.config = Object.assign({}, DefConfig);
+
+        this.config = {};
+        setOptions(this, DefConfig);
 
         init(this, nextTickHandler);
     }
@@ -842,23 +861,23 @@ export default class EasyBar {
 
     static install(Vue) {
         Vue.directive("bar", {
-            inserted: function(el, binding) {
+            inserted: (el, binding) => {
                 EasyBar.bind(
                     el,
                     binding && binding.value ? binding.value : null,
                     Vue.nextTick
                 );
             },
-            update: function(el, binding) {
+            update: (el, binding) => {
                 EasyBar.update(
                     el,
                     binding && binding.value ? binding.value : null
                 );
             },
-            componentUpdated: function(el) {
+            componentUpdated: el => {
                 EasyBar.refreshBar(el);
             },
-            unbind: function(el) {
+            unbind: el => {
                 EasyBar.unBind(el);
             }
         });
