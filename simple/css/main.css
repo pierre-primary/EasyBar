@@ -30,7 +30,7 @@ body {
     height: 250px;
     background-color: rgb(55, 55, 55);
     margin: 10px 0px;
-    padding: 16px;
+    padding: 5px;
     box-sizing: border-box;
     overflow: scroll;
 }
@@ -54,4 +54,8 @@ body {
 
 pre > img {
     width: 100%;
+}
+
+#el4.eb > .eb-bar-v .eb-thumb {
+    min-height: 100px;
 }

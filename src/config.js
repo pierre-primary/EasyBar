@@ -1,11 +1,9 @@
 /**
  * @author:Ybao
  */
-export default {
-    minLength: 50,
-    maxLength: -1,
+export var DefConfig = {
     resizeRefresh: true,
-    barfloat: false,
+    barfloat: true,
     preventParentScroll: false,
     scrollBarBehavior: null, //show|hide|none show|hide|none
 
@@ -16,6 +14,29 @@ export default {
     scrollingPhantomDelay: 1000,
     draggingPhantomDelay: 1000,
 
+    clsBox: "",
+    clsBoxScrolling: "",
+    clsBoxScrollingPhantom: "",
+    clsBoxDragging: "",
+    clsBoxDraggingPhantomClass: "",
+
+    clsBoxVisibleBarV: "",
+    clsBoxInvisibleBarV: "",
+    clsBoxVisibleBarH: "",
+    clsBoxInvisibleBarH: "",
+
+    clsBoxClip: "",
+
+    clsContent: "",
+
+    clsBarV: "",
+    clsBarH: "",
+
+    clsTrack: "",
+    clsThumb: ""
+};
+
+export var DefCls = {
     clsBox: "eb",
     clsBoxScrolling: "eb-scrolling",
     clsBoxScrollingPhantom: "eb-scrolling-phantom",
@@ -27,10 +48,13 @@ export default {
     clsBoxVisibleBarH: "eb-visible-h",
     clsBoxInvisibleBarH: "eb-invisible-h",
 
+    clsBoxClip: "eb-clip",
+
     clsContent: "eb-content",
 
-    clsTrackV: "eb-track-v",
-    clsThumbV: "eb-thumb-v",
-    clsTrackH: "eb-track-h",
-    clsThumbH: "eb-thumb-h"
+    clsBarV: "eb-bar-v",
+    clsBarH: "eb-bar-h",
+
+    clsTrack: "eb-track",
+    clsThumb: "eb-thumb"
 };

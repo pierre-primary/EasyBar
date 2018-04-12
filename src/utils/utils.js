@@ -16,31 +16,46 @@ export default class Utils {
     /**
      * 为元素添加类
      * @param {HTMLElement} el 元素
-     * @param {String} className 类名
+     * @param {String} classNames 类名
      */
-    static addClass(el, className) {
-        if (el.classList) {
-            el.classList.add(className);
-        } else if (!hasClass(el, className)) {
-            el.className += " " + className;
+    static addClass(el, ...classNames) {
+        if (classNames && classNames.length > 0) {
+            classNames.forEach(e => {
+                if (!e) {
+                    return;
+                }
+                if (el.classList) {
+                    el.classList.add(e);
+                } else if (!hasClass(el, e)) {
+                    el.className += " " + e;
+                }
+            });
         }
     }
 
     /**
      * 从元素删除类
      * @param {HTMLElement} el 元素
-     * @param {String} className 类名
+     * @param {String} classNames 类名
      */
-    static removeClass(el, className) {
-        if (el.classList) {
-            el.classList.remove(className);
-        } else {
-            el.className = el.className.replace(
-                new RegExp("\\b" + className + "\\b", "g"),
-                ""
-            );
+    static removeClass(el, ...classNames) {
+        if (classNames && classNames.length > 0) {
+            classNames.forEach(e => {
+                if (!e) {
+                    return;
+                }
+                if (el.classList) {
+                    el.classList.remove(e);
+                } else {
+                    el.className = el.className.replace(
+                        new RegExp("\\b" + e + "\\b", "g"),
+                        ""
+                    );
+                }
+            });
         }
     }
+
     /**
      * 设置css属性兼容
      * @param {HTMLElement} el 元素
@@ -56,6 +71,19 @@ export default class Utils {
         el.style["o" + _property] = value;
         el.style[property] = value;
     }
+
+    /**
+     * 设置css属性兼容
+     * @param {HTMLElement} el 元素
+     * @param {String} property 属性名
+     * @param {*} value 元素
+     */
+    static style(el, property, value) {
+        if (el.style[property] != value) {
+            el.style[property] = value;
+        }
+    }
+
     /**
      * 去抖
      * @param {Function} fn 执行体
