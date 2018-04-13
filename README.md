@@ -20,6 +20,8 @@ npm build-min:构建压缩
 
 npm start:运行开启服务,查看示例 http://localhost:8080/
 
+npm i easy-bar 安装
+
 ---
 
 ### 3、兼容性
@@ -83,7 +85,7 @@ bar.unBind();
 引入
 
 ```javascript
-import EasyBar from "./easy-bar.module.min.js";
+import EasyBar from "easy-bar";
 Vue.use(EasyBar);
 ```
 
