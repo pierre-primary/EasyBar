@@ -1,3 +1,4 @@
+import path from "path";
 import resolve from "rollup-plugin-node-resolve";
 import eslint from "rollup-plugin-eslint";
 import commonjs from "rollup-plugin-commonjs";
@@ -11,14 +12,14 @@ import nested from "postcss-nested";
 import cssnext from "postcss-cssnext";
 import cssnano from "cssnano";
 
-import config from "../config/config.js";
+const fullPath = p => path.resolve(__dirname, "../", p);
 
 module.exports = {
-    input: config.inputFile,
+    input: fullPath("src/easy-bar.js"),
     output: {
-        file: config.testBasePath + "/" + "dev.js",
-        format: "iife",
-        name: config.moduleName,
+        file: fullPath("test/dev.js"),
+        format: "umd",
+        name: "EasyBar",
         sourcemap: true
     },
     plugins: [
@@ -40,7 +41,7 @@ module.exports = {
             browser: true
         }),
         eslint({
-            include: [config.srcPath + "/**/*.js"] // 需要检查的部分
+            include: [fullPath("src/") + "**/*.js"] // 需要检查的部分
         }),
         commonjs(),
         babel({
@@ -48,13 +49,13 @@ module.exports = {
         }),
         serve({
             open: false,
-            contentBase: config.testBasePath,
+            contentBase: fullPath("test/"),
             historyApiFallback: true,
-            host: config.testHost,
-            port: config.testPort
+            host: "localhost",
+            port: 8080
         }),
         livereload({
-            watch: config.testBasePath
+            watch: fullPath("test/")
         })
     ]
 };

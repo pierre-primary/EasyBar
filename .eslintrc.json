@@ -2,11 +2,15 @@
     "env": {
         "node": true,
         "browser": true,
-        "es6": true
+        "es6": true,
+        "commonjs": true
     },
     "extends": "eslint:recommended",
     "parserOptions": {
-        "sourceType": "module"
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        }
     },
     "rules": {
         "indent": ["warn", 4],

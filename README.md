@@ -16,8 +16,6 @@ js 实现的浏览器自定义 ScrollBar 工具
 
 npm build:构建
 
-npm build-min:构建压缩
-
 npm start:运行开启服务,查看示例 http://localhost:8080/
 
 npm i easy-bar 安装
@@ -34,14 +32,14 @@ npm i easy-bar 安装
 
 ### 4、快速使用
 
-根据开发场景选择对应的版本.browser.js|.modeule.js|.umd.js
+根据开发场景选择对应的版本.js|.min.js|.common.js|.umd.js
 
 #### 4.1、HTML-JS-CSS
 
 引入
 
 ```html
-<script src="./easy-bar.browser.min.js"></script>
+<script src="./easy-bar.min.js"></script>
 ```
 
 ```html
