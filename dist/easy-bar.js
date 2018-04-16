@@ -1,5 +1,5 @@
 /*!
-* easy-bar.js v1.0.0
+* easy-bar.js v1.0.1
 * (c) 2018-2018 PengYuan-Jiang
 */
 (function (global, factory) {
