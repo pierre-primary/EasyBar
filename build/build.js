@@ -15,7 +15,7 @@ function build(builds) {
                     next();
                 }
             })
-            .catch(logError);
+            .catch(log);
     };
     next();
 }
@@ -28,13 +28,18 @@ function buildEntry({ input, output }) {
         .then(bundle => bundle.generate(output))
         .then(({ code }) => {
             if (isMin) {
-                var minified = uglify.minify(code, {
+                var rep = uglify.minify(code, {
                     output: {
                         preamble: output.banner,
                         ascii_only: true
                     }
-                }).code;
-                return write(output.file, minified, true);
+                });
+                if (rep.error) {
+                    logError(rep.error);
+                    return false;
+                } else {
+                    return write(output.file, rep.code, true);
+                }
             } else {
                 return write(output.file, code);
             }
@@ -44,7 +49,7 @@ function buildEntry({ input, output }) {
 function write(dest, code, zip) {
     return new Promise((resolve, reject) => {
         function report(extra) {
-            logError(
+            log(
                 blue(path.relative(process.cwd(), dest)) +
                     " " +
                     getSize(code) +
@@ -71,12 +76,14 @@ function getSize(code) {
     return (code.length / 1024).toFixed(2) + "kb";
 }
 
-function logError(e) {
+function log(e) {
     console.log(e);
+}
+function logError(e) {
+    console.error(e);
 }
 
 function blue(str) {
     return "\x1b[1m\x1b[34m" + str + "\x1b[39m\x1b[22m";
 }
-
 module.exports = build;
