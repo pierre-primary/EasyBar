@@ -4,7 +4,7 @@
     "description": "通用自定义scrollbar",
     "main": "dist/easy-bar.common.js",
     "scripts": {
-        "start": "rollup --config build/rollup.dev.js --watch",
+        "start": "rollup --config build/rollup.dev.js",
         "build": "node build/rollup.prod.js"
     },
     "author": "ybao",
