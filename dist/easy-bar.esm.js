@@ -1,5 +1,5 @@
 /*!
-* easy-bar.js v1.0.1
+* easy-bar.js v1.0.2
 * (c) 2018-2018 PengYuan-Jiang
 */
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
