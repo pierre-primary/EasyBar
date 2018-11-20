@@ -74,7 +74,7 @@ var Utils = function () {
                     }
                     if (el.classList) {
                         el.classList.add(e);
-                    } else if (!hasClass(el, e)) {
+                    } else if (!Utils.hasClass(el, e)) {
                         el.className += " " + e;
                     }
                 });
