@@ -1,6 +1,6 @@
 {
     "name": "@y-bao/easy-bar",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "通用自定义scrollbar",
     "main": "dist/easy-bar.common.js",
     "files": [

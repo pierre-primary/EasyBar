@@ -23,10 +23,10 @@ function checkCevEl(el) {
  * @returns {Array}  [v, h]
  */
 function getNativeScrollbarWidth() {
-    var container = document.body;
+    let container = document.body;
 
-    var box = document.createElement("div");
-    var cev = document.createElement("div");
+    let box = document.createElement("div");
+    let cev = document.createElement("div");
 
     box.className = HideNativeBarClass;
     box.style.position = "absolute";
@@ -43,13 +43,13 @@ function getNativeScrollbarWidth() {
     box.appendChild(cev);
     container.appendChild(box);
 
-    var fullWidth = cev.offsetWidth;
-    var fullHeight = cev.offsetHeight;
+    let fullWidth = cev.offsetWidth;
+    let fullHeight = cev.offsetHeight;
 
     box.style.overflow = "scroll";
 
-    var v = fullWidth - cev.offsetWidth;
-    var h = fullHeight - cev.offsetHeight;
+    let v = fullWidth - cev.offsetWidth;
+    let h = fullHeight - cev.offsetHeight;
 
     container.removeChild(box);
 
@@ -60,13 +60,13 @@ function getNativeScrollbarWidth() {
 }
 
 function createBar() {
-    var scrollBarBox = document.createElement("div");
+    let scrollBarBox = document.createElement("div");
     scrollBarBox.style.position = "absolute";
     scrollBarBox.style.overflow = "hidden";
-    var scrollBarTrack = document.createElement("div");
+    let scrollBarTrack = document.createElement("div");
     scrollBarTrack.style.position = "relative";
     scrollBarTrack.style.overflow = "hidden";
-    var scrollBarThumb = document.createElement("div");
+    let scrollBarThumb = document.createElement("div");
     scrollBarThumb.style.position = "relative";
 
     scrollBarTrack.appendChild(scrollBarThumb);
@@ -128,7 +128,7 @@ function initMouseDown(state) {
             if (!event.targetTouches && event.which !== 1) {
                 return false;
             }
-            var p = event.targetTouches ? event.targetTouches[0] : event;
+            let p = event.targetTouches ? event.targetTouches[0] : event;
             if (state.vBar && this == state.vBar.scrollBarThumb) {
                 state.vBar.barDragging = true;
                 state.vBar.startMouse = p.clientY - state.vBar.scrollBarThumb.getBoundingClientRect().top;
@@ -161,7 +161,7 @@ function initMouseMove(state) {
     if (!state.mouseMove) {
         state.mouseMove = Utils.throttle(
             function(event) {
-                var p = event.targetTouches ? event.targetTouches[0] : event;
+                let p = event.targetTouches ? event.targetTouches[0] : event;
                 onDragging(state, p);
             },
             function() {
@@ -211,21 +211,21 @@ function bindWheelHandler(state) {
                 if (state.visibleArea >= 1) {
                     return false;
                 }
-                var scrollDistV = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
-                var scrollTop = state.scrollCevBox.scrollTop;
+                let scrollDistV = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
+                let scrollTop = state.scrollCevBox.scrollTop;
 
-                var wheelingUp = event.deltaY < 0;
-                var wheelingDown = event.deltaY > 0;
+                let wheelingUp = event.deltaY < 0;
+                let wheelingDown = event.deltaY > 0;
                 if ((scrollTop <= 0 && wheelingUp) || (scrollTop >= scrollDistV && wheelingDown)) {
                     event.preventDefault();
                     return false;
                 }
 
-                var scrollDistH = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
-                var scrollLeft = state.scrollCevBox.scrollLeft;
+                let scrollDistH = state.scrollCevBox.scrollHeight - state.scrollCevBox.clientHeight;
+                let scrollLeft = state.scrollCevBox.scrollLeft;
 
-                var wheelingLeft = event.deltaX < 0;
-                var wheelingRight = event.deltaX > 0;
+                let wheelingLeft = event.deltaX < 0;
+                let wheelingRight = event.deltaX > 0;
                 if ((scrollLeft <= 0 && wheelingLeft) || (scrollLeft >= scrollDistH && wheelingRight)) {
                     event.preventDefault();
                     return false;
@@ -353,7 +353,7 @@ function unBindScrollBox(state) {
  * @param {*} state
  */
 function bindScrollBar(state) {
-    var bar;
+    let bar;
     if (state.barBehavior.vBarEnable && state.barBehavior.vBarShow) {
         if (!state.vBar) {
             bar = createBar();
@@ -402,7 +402,7 @@ function updateScrollCevBoxStyle(state) {
         state.scrollCevBox.style.width = "100%";
     } else {
         //大部分浏览起的scrollbar都通过css隐藏，剩下的移除屏幕隐藏
-        var nBarW = getNativeScrollbarWidth();
+        let nBarW = getNativeScrollbarWidth();
         if (state.vBar) {
             state.scrollCevBox.style.overflowY = "scroll";
             state.scrollCevBox.style.width = "calc(100% + " + nBarW.v + "px)";
@@ -444,7 +444,7 @@ function unBindScrollBarH(state) {
 }
 
 function computeScrollBarBox(state) {
-    var showBarV = 0,
+    let showBarV = 0,
         showBarH = 0;
     state.scrollBoxClip.style.width = "100%";
     state.scrollBoxClip.style.height = "100%";
@@ -488,7 +488,7 @@ function computeScrollBarBox(state) {
 }
 
 function computeScrollBoxStyle(state) {
-    var bar;
+    let bar;
     if ((bar = state.vBar) && bar.show) {
         Utils.removeClass(state.scrollBox, DefCls.clsBoxInvisibleBarV, state.config.clsBoxInvisibleBarV);
         Utils.addClass(state.scrollBox, DefCls.clsBoxVisibleBarV, state.config.clsBoxVisibleBarV);
@@ -510,7 +510,7 @@ function computeScrollBoxStyle(state) {
  * @param {*} state
  */
 function computeScrollBarThumb(state) {
-    var bar, visibleArea, barLength, barOffset, scrollOffsetArea;
+    let bar, visibleArea, barLength, barOffset, scrollOffsetArea;
     if ((bar = state.vBar) && bar.show) {
         visibleArea = state.scrollCevBox.scrollHeight == 0 ? 1 : state.scrollCevBox.clientHeight / state.scrollCevBox.scrollHeight;
 
@@ -545,8 +545,8 @@ function computeScrollBarThumb(state) {
  * @param {*} state
  */
 function onDragging(state, p) {
-    var handlerEvent = false;
-    var bar, relativeMouse, barOffset, scrollOffsetArea;
+    let handlerEvent = false;
+    let bar, relativeMouse, barOffset, scrollOffsetArea;
     if ((bar = state.vBar) && bar.barDragging && bar.show) {
         relativeMouse = p.clientY - bar.scrollBarTrack.getBoundingClientRect().top;
         if (relativeMouse <= bar.startMouse) {
@@ -631,7 +631,7 @@ function create(state) {
  * @param {*} state
  */
 function refreshBar(state) {
-    var refreshFn = () => {
+    let refreshFn = () => {
         if (!state) {
             return;
         }
@@ -656,11 +656,11 @@ function destroy(state) {
 
 function analyzeScrollBarBehavior(scrollBarBehavior) {
     scrollBarBehavior = scrollBarBehavior || "";
-    var v = "show",
+    let v = "show",
         h = "show";
-    var oneRegex = /^\s*(show|hide|none)\s*$/i;
-    var twoRegex = /^\s*(show|hide|none)\s+(show|hide|none)\s*$/i;
-    var match;
+    let oneRegex = /^\s*(show|hide|none)\s*$/i;
+    let twoRegex = /^\s*(show|hide|none)\s+(show|hide|none)\s*$/i;
+    let match;
     if ((match = scrollBarBehavior.match(oneRegex))) {
         if (match.length >= 2) {
             v = h = match[1].toLowerCase();
@@ -671,8 +671,8 @@ function analyzeScrollBarBehavior(scrollBarBehavior) {
             h = match[2].toLowerCase();
         }
     }
-    var vBarEnable = true;
-    var vBarShow = true;
+    let vBarEnable = true;
+    let vBarShow = true;
     if (v == "none") {
         vBarEnable = false;
         vBarShow = false;
@@ -680,8 +680,8 @@ function analyzeScrollBarBehavior(scrollBarBehavior) {
         vBarEnable = true;
         vBarShow = false;
     }
-    var hBarEnable = true;
-    var hBarShow = true;
+    let hBarEnable = true;
+    let hBarShow = true;
     if (h == "none") {
         hBarEnable = false;
         hBarShow = false;
@@ -699,7 +699,7 @@ function analyzeScrollBarBehavior(scrollBarBehavior) {
 
 function setOptions(state, options) {
     if (options) {
-        for (var key in options) {
+        for (let key in options) {
             state.config[key] = options[key];
         }
     }

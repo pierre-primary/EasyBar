@@ -1,5 +1,5 @@
 /*!
-* easy-bar.js v1.0.2
+* easy-bar.js v1.0.3
 * (c) 2018-2018 PengYuan-Jiang
 */
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
@@ -625,7 +625,7 @@ function unBindScrollBox(state) {
  * @param {*} state
  */
 function bindScrollBar(state) {
-    var bar;
+    var bar = void 0;
     if (state.barBehavior.vBarEnable && state.barBehavior.vBarShow) {
         if (!state.vBar) {
             bar = createBar();
@@ -760,7 +760,7 @@ function computeScrollBarBox(state) {
 }
 
 function computeScrollBoxStyle(state) {
-    var bar;
+    var bar = void 0;
     if ((bar = state.vBar) && bar.show) {
         Utils.removeClass(state.scrollBox, DefCls.clsBoxInvisibleBarV, state.config.clsBoxInvisibleBarV);
         Utils.addClass(state.scrollBox, DefCls.clsBoxVisibleBarV, state.config.clsBoxVisibleBarV);
@@ -782,7 +782,11 @@ function computeScrollBoxStyle(state) {
  * @param {*} state
  */
 function computeScrollBarThumb(state) {
-    var bar, visibleArea, barLength, barOffset, scrollOffsetArea;
+    var bar = void 0,
+        visibleArea = void 0,
+        barLength = void 0,
+        barOffset = void 0,
+        scrollOffsetArea = void 0;
     if ((bar = state.vBar) && bar.show) {
         visibleArea = state.scrollCevBox.scrollHeight == 0 ? 1 : state.scrollCevBox.clientHeight / state.scrollCevBox.scrollHeight;
 
@@ -814,7 +818,10 @@ function computeScrollBarThumb(state) {
  */
 function onDragging(state, p) {
     var handlerEvent = false;
-    var bar, relativeMouse, barOffset, scrollOffsetArea;
+    var bar = void 0,
+        relativeMouse = void 0,
+        barOffset = void 0,
+        scrollOffsetArea = void 0;
     if ((bar = state.vBar) && bar.barDragging && bar.show) {
         relativeMouse = p.clientY - bar.scrollBarTrack.getBoundingClientRect().top;
         if (relativeMouse <= bar.startMouse) {
@@ -924,7 +931,7 @@ function analyzeScrollBarBehavior(scrollBarBehavior) {
         h = "show";
     var oneRegex = /^\s*(show|hide|none)\s*$/i;
     var twoRegex = /^\s*(show|hide|none)\s+(show|hide|none)\s*$/i;
-    var match;
+    var match = void 0;
     if (match = scrollBarBehavior.match(oneRegex)) {
         if (match.length >= 2) {
             v = h = match[1].toLowerCase();
