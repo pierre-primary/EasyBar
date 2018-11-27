@@ -90,6 +90,9 @@ function careteMutationObserver(state) {
     return new MutationObserver(
         Utils.throttle(
             function() {
+                if (!state.isBinded) {
+                    return;
+                }
                 refreshBar(state);
             },
             function() {
@@ -107,6 +110,9 @@ function initScrollHandler(state) {
     if (!state.scrollHandler) {
         state.scrollHandler = Utils.throttle(
             function() {
+                if (!state.isBinded) {
+                    return;
+                }
                 computeScrollBarBox(state);
                 computeScrollBarThumb(state);
                 withScrollingClass(state);
@@ -125,6 +131,9 @@ function initScrollHandler(state) {
 function initMouseDown(state) {
     if (!state.mouseDown) {
         state.mouseDown = function(event) {
+            if (!state.isBinded) {
+                return false;
+            }
             if (!event.targetTouches && event.which !== 1) {
                 return false;
             }
@@ -161,6 +170,9 @@ function initMouseMove(state) {
     if (!state.mouseMove) {
         state.mouseMove = Utils.throttle(
             function(event) {
+                if (!state.isBinded) {
+                    return;
+                }
                 let p = event.targetTouches ? event.targetTouches[0] : event;
                 onDragging(state, p);
             },
@@ -181,6 +193,9 @@ function initMouseMove(state) {
 function initMouseUp(state) {
     if (!state.mouseUp) {
         state.mouseUp = function(event) {
+            if (!state.isBinded) {
+                return;
+            }
             state.vBar && (state.vBar.barDragging = false);
             state.hBar && (state.hBar.barDragging = false);
 
@@ -208,6 +223,9 @@ function bindWheelHandler(state) {
     if (state.config.preventParentScroll) {
         if (!state.wheelHandler) {
             state.wheelHandler = function(event) {
+                if (!state.isBinded) {
+                    return;
+                }
                 if (state.visibleArea >= 1) {
                     return false;
                 }
@@ -256,6 +274,9 @@ function bindResizeHandler(state) {
         if (!state.resizeHandler) {
             state.resizeHandler = Utils.debounce(
                 function() {
+                    if (!state.isBinded) {
+                        return;
+                    }
                     refreshBar(state);
                 },
                 function() {
@@ -715,12 +736,12 @@ export default class EasyBar {
 
         this.config = {};
         setOptions(this, DefConfig);
-
         init(this, nextTickHandler);
     }
 
     bind(options) {
         this.update(options);
+        this._isBinded = true;
         return this;
     }
 
@@ -737,8 +758,13 @@ export default class EasyBar {
     }
 
     unBind() {
+        this._isBinded = false;
         destroy(this);
         return this;
+    }
+
+    get isBinded() {
+        return !!this._isBinded;
     }
 
     static bind(el, options, nextTickHandler) {

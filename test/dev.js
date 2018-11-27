@@ -379,6 +379,9 @@ function careteMutationObserver(state) {
     }
 
     return new MutationObserver(Utils.throttle(function () {
+        if (!state.isBinded) {
+            return;
+        }
         _refreshBar(state);
     }, function () {
         return state.config.observerThrottle;
@@ -392,6 +395,9 @@ function careteMutationObserver(state) {
 function initScrollHandler(state) {
     if (!state.scrollHandler) {
         state.scrollHandler = Utils.throttle(function () {
+            if (!state.isBinded) {
+                return;
+            }
             computeScrollBarBox(state);
             computeScrollBarThumb(state);
             withScrollingClass(state);
@@ -408,6 +414,9 @@ function initScrollHandler(state) {
 function initMouseDown(state) {
     if (!state.mouseDown) {
         state.mouseDown = function (event) {
+            if (!state.isBinded) {
+                return false;
+            }
             if (!event.targetTouches && event.which !== 1) {
                 return false;
             }
@@ -443,6 +452,9 @@ function initMouseDown(state) {
 function initMouseMove(state) {
     if (!state.mouseMove) {
         state.mouseMove = Utils.throttle(function (event) {
+            if (!state.isBinded) {
+                return;
+            }
             var p = event.targetTouches ? event.targetTouches[0] : event;
             onDragging(state, p);
         }, function () {
@@ -460,6 +472,9 @@ function initMouseMove(state) {
 function initMouseUp(state) {
     if (!state.mouseUp) {
         state.mouseUp = function (event) {
+            if (!state.isBinded) {
+                return;
+            }
             state.vBar && (state.vBar.barDragging = false);
             state.hBar && (state.hBar.barDragging = false);
 
@@ -487,6 +502,9 @@ function bindWheelHandler(state) {
     if (state.config.preventParentScroll) {
         if (!state.wheelHandler) {
             state.wheelHandler = function (event) {
+                if (!state.isBinded) {
+                    return;
+                }
                 if (state.visibleArea >= 1) {
                     return false;
                 }
@@ -534,6 +552,9 @@ function bindResizeHandler(state) {
     if (state.config.resizeRefresh) {
         if (!state.resizeHandler) {
             state.resizeHandler = Utils.debounce(function () {
+                if (!state.isBinded) {
+                    return;
+                }
                 _refreshBar(state);
             }, function () {
                 return state.config.resizeDebounce;
@@ -991,7 +1012,6 @@ var EasyBar = function () {
 
         this.config = {};
         setOptions(this, DefConfig);
-
         init(this, nextTickHandler);
     }
 
@@ -999,6 +1019,7 @@ var EasyBar = function () {
         key: "bind",
         value: function bind(options) {
             this.update(options);
+            this._isBinded = true;
             return this;
         }
     }, {
@@ -1018,8 +1039,14 @@ var EasyBar = function () {
     }, {
         key: "unBind",
         value: function unBind() {
+            this._isBinded = false;
             destroy(this);
             return this;
+        }
+    }, {
+        key: "isBinded",
+        get: function get$$1() {
+            return !!this._isBinded;
         }
     }], [{
         key: "bind",
